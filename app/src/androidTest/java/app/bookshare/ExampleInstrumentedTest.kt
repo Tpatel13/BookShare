@@ -1,4 +1,4 @@
-package app.sharethebook
+package app.bookshare
 
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4

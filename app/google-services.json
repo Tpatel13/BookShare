@@ -8,17 +8,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:936225223396:android:41710e5fd6369262",
+        "mobilesdk_app_id": "1:936225223396:android:0ad9cfb447cd44b2",
         "android_client_info": {
-          "package_name": "app.sharethebook"
+          "package_name": "app.bookshare"
         }
       },
       "oauth_client": [
         {
-          "client_id": "936225223396-renbbm021uu7avgvrqaih4bt5etthint.apps.googleusercontent.com",
+          "client_id": "936225223396-uc99ao379luu22b7ids61nstukikd66k.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "app.sharethebook",
+            "package_name": "app.bookshare",
             "certificate_hash": "0a705d7d802e79966bfdbc7058e466f144c49db7"
           }
         },

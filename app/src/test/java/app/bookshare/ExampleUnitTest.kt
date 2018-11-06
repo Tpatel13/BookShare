@@ -1,4 +1,4 @@
-package app.sharethebook
+package app.bookshare
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

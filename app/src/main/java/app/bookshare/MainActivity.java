@@ -1,4 +1,4 @@
-package app.sharethebook;
+package app.bookshare;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
