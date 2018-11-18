@@ -17,6 +17,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 /**
  * A login screen that offers login via email/password.
  */
@@ -33,11 +35,19 @@ public class LoginActivity extends AppCompatActivity {
     private View mProgressView;
     private View mLoginFormView;
 
+    FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        // Set up the login form.
+
+        if (mAuth.getCurrentUser() != null) {
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
+        }
+
+        // Set up the login form
         mEmailView = findViewById(R.id.email);
 
         mPasswordView = (EditText) findViewById(R.id.password);

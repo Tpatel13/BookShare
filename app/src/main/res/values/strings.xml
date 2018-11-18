@@ -18,7 +18,7 @@
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email completions."</string>
-    <string name="title_activity_register">RegisterActivity</string>
+    <string name="title_activity_register">Sign up</string>
     <string name="title_activity_add_book">Add your book</string>
 
     <!--Add Book Activity-->
@@ -28,6 +28,8 @@
     <string name="hint_book_genre">Book Genre</string>
     <string name="hint_add_book_photo">+ Add book photo</string>
     <string name="camera_and_storage_rationale">Need storage and camera permission</string>
+    <string name="sign_in_cancelled">Sign up cancelled by the user</string>
+    <string name="no_internet_connection">No internet connection available</string>
 
     <string-array name="genre_array">
         <item>Science fiction</item>
