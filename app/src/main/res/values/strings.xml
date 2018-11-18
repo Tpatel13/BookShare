@@ -20,4 +20,11 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email completions."</string>
     <string name="title_activity_register">RegisterActivity</string>
     <string name="title_activity_add_book">Add your book</string>
+
+    <!--Add Book Activity-->
+    <string name="hint_book_name">Book Name</string>
+    <string name="hint_book_author">Book Author</string>
+    <string name="hint_book_publisher">Book Publisher</string>
+    <string name="hint_book_genre">Book Genre</string>
+    <string name="hint_add_book_photo">+ Add book photo</string>
 </resources>
