@@ -27,4 +27,26 @@
     <string name="hint_book_publisher">Book Publisher</string>
     <string name="hint_book_genre">Book Genre</string>
     <string name="hint_add_book_photo">+ Add book photo</string>
+    <string name="camera_and_storage_rationale">Need storage and camera permission</string>
+
+    <string-array name="genre_array">
+        <item>Science fiction</item>
+        <item>Satire</item>
+        <item>Drama</item>
+        <item>Romance</item>
+        <item>Mystery</item>
+        <item>Horror</item>
+        <item>Health</item>
+        <item>Guide</item>
+        <item>Travel</item>
+        <item>Science</item>
+        <item>History</item>
+        <item>Math</item>
+        <item>Poetry</item>
+        <item>Dictionaries</item>
+        <item>Children\'s</item>
+        <item>Religion, Spirituality &amp; New Age</item>
+        <item>Self help</item>
+    </string-array>
+
 </resources>

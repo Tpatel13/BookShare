@@ -7,4 +7,6 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="button_corner_radius">60dp</dimen>
     <dimen name="text_size_18sp">18sp</dimen>
+
+    <dimen name="grid_expected_size">120dp</dimen>
 </resources>
