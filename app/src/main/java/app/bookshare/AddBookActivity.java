@@ -3,39 +3,51 @@ package app.bookshare;
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.View;
-import android.view.ViewAnimationUtils;
-import android.view.ViewTreeObserver;
+import android.view.*;
 import android.view.animation.AccelerateInterpolator;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-
-import com.zhihu.matisse.Matisse;
-import com.zhihu.matisse.MimeType;
-import com.zhihu.matisse.engine.impl.GlideEngine;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import android.widget.*;
+import app.bookshare.model.BookDetailModel;
+import app.bookshare.model.UserBookAndGenreModel;
 import app.bookshare.util.MultiSelectSpinner;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.zhihu.matisse.Matisse;
+import com.zhihu.matisse.MimeType;
+import com.zhihu.matisse.engine.impl.GlideEngine;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class AddBookActivity extends AppCompatActivity {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class AddBookActivity extends BaseActivity {
 
     public static final String EXTRA_CIRCULAR_REVEAL_X = "EXTRA_CIRCULAR_REVEAL_X";
     public static final String EXTRA_CIRCULAR_REVEAL_Y = "EXTRA_CIRCULAR_REVEAL_Y";
@@ -58,11 +70,24 @@ public class AddBookActivity extends AppCompatActivity {
     EditText etBookPublisher;
     @BindView(R.id.spGenre)
     MultiSelectSpinner spBookGenre;
+    @BindView(R.id.llRoot)
+    LinearLayout llRoot;
+    @BindView(R.id.etBookDescription)
+    EditText etBookDescription;
 
     private int revealX;
     private int revealY;
 
     List<Uri> mSelected = new ArrayList<>();
+    //Notification progress
+    NotificationManager mNotifyManager;
+    int notificationId = 1;
+    private DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+    private FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
+    private StorageReference storageRef;
+    private StorageReference imageUploadRef;
+    private NotificationCompat.Builder notificationBuilder;
+    private String downloadImageUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +101,11 @@ public class AddBookActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         final Intent intent = getIntent();
+
+        initNotification();
+
+        storageRef = firebaseStorage.getReferenceFromUrl(
+                "gs://" + getResources().getString(R.string.google_storage_bucket));
 
         rootLayout = findViewById(R.id.root_layout);
 
@@ -105,6 +135,13 @@ public class AddBookActivity extends AppCompatActivity {
         setSpinner();
     }
 
+    private void initNotification() {
+        mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notificationBuilder = new NotificationCompat.Builder(this,
+                "Upload Progress");
+    }
+
     private void setSpinner() {
         final String[] selected = {"Book Genre"};
         spBookGenre.setItemsChecked(selected);
@@ -125,12 +162,14 @@ public class AddBookActivity extends AppCompatActivity {
                 public void onAnimationStart(Animator animator) {
                     rootLayout.setBackgroundColor(ContextCompat.getColor(AddBookActivity.this,
                             R.color.colorAccent));
+                    llRoot.setVisibility(View.GONE);
                 }
 
                 @Override
                 public void onAnimationEnd(Animator animator) {
                     rootLayout.setBackgroundColor(ContextCompat.getColor(AddBookActivity.this,
                             android.R.color.background_light));
+                    llRoot.setVisibility(View.VISIBLE);
                 }
 
                 @Override
@@ -189,6 +228,119 @@ public class AddBookActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_add_book_menu, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == R.id.action_done) {
+            putBookIntoDatabase();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void putBookIntoDatabase() {
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        if (auth.getCurrentUser() != null) {
+            FirebaseUser user = auth.getCurrentUser();
+            String bookAuthor = etBookAuthor.getText().toString().trim();
+            String bookPublisher = etBookPublisher.getText().toString().trim();
+            List<String> selectedGenre = spBookGenre.getSelectedStrings();
+            String bookName = etBoookName.getText().toString().trim();
+            String bookDescription = etBookDescription.getText().toString().trim();
+            BookDetailModel bookDetailModel = new BookDetailModel(user.getUid(),
+                    bookAuthor, bookPublisher, selectedGenre, bookName, bookDescription, "");
+
+            String key = database.child("books").push().getKey();
+            Map<String, Object> bookValues = bookDetailModel.toMap();
+
+            Map<String, Object> childUpdates = new HashMap<>();
+            if (key != null) {
+                childUpdates.put("/books/" + key, bookValues);
+                for (String genre : selectedGenre) {
+                    UserBookAndGenreModel userBookAndGenreModel = new UserBookAndGenreModel(key, true);
+                    childUpdates.put("/genres/" + genre, userBookAndGenreModel.toMap());
+                }
+                UserBookAndGenreModel userBookAndGenreModel = new UserBookAndGenreModel(key, true);
+                childUpdates.put("/users-books/" + user.getUid(), userBookAndGenreModel.toMap());
+                database.updateChildren(childUpdates);
+                uploadImage(key);
+            }
+        }
+    }
+
+    private void uploadImage(final String key) {
+        Long time = System.currentTimeMillis();
+        if (!mSelected.isEmpty() && getUid() != null) {
+            imageUploadRef = storageRef.child(getUid()).child("images")
+                    .child(time.toString()).child(mSelected.get(0).getLastPathSegment());
+
+            int notifyID = 1;
+            String CHANNEL_ID = "my_channel_01";// The id of the channel.
+            CharSequence name = "Upload Image";// The user-visible name of the channel.
+            int importance = 0;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                importance = NotificationManager.IMPORTANCE_HIGH;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
+                    mNotifyManager.createNotificationChannel(mChannel);
+                }
+            }
+
+            notificationBuilder.setContentTitle(getString(R.string.upload_video))
+                    .setContentText(getString(R.string.upload_in_progress))
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setAutoCancel(false)
+                    .setSmallIcon(android.R.drawable.stat_sys_upload);
+
+            mNotifyManager.notify(notificationId, notificationBuilder.build());
+
+            Toast.makeText(this, R.string.upload_in_progress, Toast.LENGTH_LONG).show();
+
+            final UploadTask uploadTaskImage = imageUploadRef.putFile(mSelected.get(0));
+            Task<Uri> urlTask = uploadTaskImage.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                @Override
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if (!task.isSuccessful()) {
+                        throw task.getException();
+                    }
+
+                    // Continue with the task to get the download URL
+                    return imageUploadRef.getDownloadUrl();
+                }
+
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    if (task.isSuccessful()) {
+                        downloadImageUrl = task.getResult().toString();
+                        BookDetailModel bookDetailModel = new BookDetailModel(downloadImageUrl);
+                        Map<String, Object> childUpdates = new HashMap<>();
+                        childUpdates.put("/books/" + key, bookDetailModel.toDownloadUrlMap());
+                        database.updateChildren(childUpdates);
+                        notificationBuilder.setContentText(getString(R.string.upload_complete));
+                        // Removes the progress bar
+                        notificationBuilder.setProgress(0, 0, false);
+                        notificationBuilder.setSmallIcon(android.R.drawable.stat_sys_upload_done);
+                        mNotifyManager.notify(notificationId, notificationBuilder.build());
+                        notificationBuilder.setAutoCancel(true);
+                    } else {
+                        // Handle failures
+                        // ...
+                    }
+                }
+            });
+            uploadTaskImage.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                    notificationBuilder.setProgress(100, (int) progress, false);
+                    mNotifyManager.notify(notificationId, notificationBuilder.build());
+                }
+            });
+        }
     }
 
     @Override

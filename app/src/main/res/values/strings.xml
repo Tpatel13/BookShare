@@ -30,6 +30,10 @@
     <string name="camera_and_storage_rationale">Need storage and camera permission</string>
     <string name="sign_in_cancelled">Sign up cancelled by the user</string>
     <string name="no_internet_connection">No internet connection available</string>
+    <string name="hint_book_description">Book Description</string>
+    <string name="upload_video">Upload</string>
+    <string name="upload_in_progress">Upload in progress</string>
+    <string name="upload_complete">Upload complete</string>
 
     <string-array name="genre_array">
         <item>Science fiction</item>
