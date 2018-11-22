@@ -15,12 +15,11 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <include layout="@layout/item_book" />
-
-        <include layout="@layout/item_book" />
-
-        <include layout="@layout/item_book" />
-
+        <fragment
+            android:id="@+id/bookListFragment"
+            android:name="app.bookshare.fragment.MainFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
     </LinearLayout>
 

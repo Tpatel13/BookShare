@@ -16,15 +16,18 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.*;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewAnimationUtils;
+import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
-import android.widget.*;
-import app.bookshare.model.BookDetailModel;
-import app.bookshare.model.UserBookAndGenreModel;
-import app.bookshare.util.MultiSelectSpinner;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Toast;
+
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -39,13 +42,20 @@ import com.google.firebase.storage.UploadTask;
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.engine.impl.GlideEngine;
-import pub.devrel.easypermissions.AfterPermissionGranted;
-import pub.devrel.easypermissions.EasyPermissions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import app.bookshare.model.BookDetailModel;
+import app.bookshare.model.UserBookAndGenreModel;
+import app.bookshare.util.MultiSelectSpinner;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
 
 public class AddBookActivity extends BaseActivity {
 
@@ -251,7 +261,8 @@ public class AddBookActivity extends BaseActivity {
             String bookName = etBoookName.getText().toString().trim();
             String bookDescription = etBookDescription.getText().toString().trim();
             BookDetailModel bookDetailModel = new BookDetailModel(user.getUid(),
-                    bookAuthor, bookPublisher, selectedGenre, bookName, bookDescription, "");
+                    bookAuthor, bookPublisher, selectedGenre, bookName, auth.getCurrentUser().getDisplayName()
+                    , bookDescription, "");
 
             String key = database.child("books").push().getKey();
             Map<String, Object> bookValues = bookDetailModel.toMap();
@@ -261,10 +272,10 @@ public class AddBookActivity extends BaseActivity {
                 childUpdates.put("/books/" + key, bookValues);
                 for (String genre : selectedGenre) {
                     UserBookAndGenreModel userBookAndGenreModel = new UserBookAndGenreModel(key, true);
-                    childUpdates.put("/genres/" + genre, userBookAndGenreModel.toMap());
+                    childUpdates.put("/genres/" + "/" + genre + "/" + key, true);
                 }
                 UserBookAndGenreModel userBookAndGenreModel = new UserBookAndGenreModel(key, true);
-                childUpdates.put("/users-books/" + user.getUid(), userBookAndGenreModel.toMap());
+                childUpdates.put("/users-books/" + "/" + user.getUid() + "/" + key, true);
                 database.updateChildren(childUpdates);
                 uploadImage(key);
             }
@@ -316,9 +327,8 @@ public class AddBookActivity extends BaseActivity {
                 public void onComplete(@NonNull Task<Uri> task) {
                     if (task.isSuccessful()) {
                         downloadImageUrl = task.getResult().toString();
-                        BookDetailModel bookDetailModel = new BookDetailModel(downloadImageUrl);
                         Map<String, Object> childUpdates = new HashMap<>();
-                        childUpdates.put("/books/" + key, bookDetailModel.toDownloadUrlMap());
+                        childUpdates.put("/books/" + key + "/imageUrl", downloadImageUrl);
                         database.updateChildren(childUpdates);
                         notificationBuilder.setContentText(getString(R.string.upload_complete));
                         // Removes the progress bar
