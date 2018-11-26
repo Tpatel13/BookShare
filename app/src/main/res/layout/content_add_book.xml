@@ -47,8 +47,9 @@
             android:textSize="18sp" />
 
         <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+                android:id="@+id/tlBookName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
             <EditText
                 android:id="@+id/etBoookName"
@@ -61,8 +62,9 @@
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+                android:id="@+id/tlBookAuthor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
             <EditText
                 android:id="@+id/etBookAuthor"
@@ -75,8 +77,9 @@
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+                android:id="@+id/tlBookPublisher"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
             <EditText
                 android:id="@+id/etBookPublisher"
@@ -103,6 +106,7 @@
         </FrameLayout>
 
         <android.support.design.widget.TextInputLayout
+                android:id="@+id/tlBookDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 

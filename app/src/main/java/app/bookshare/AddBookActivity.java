@@ -12,22 +12,23 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewAnimationUtils;
-import android.view.ViewTreeObserver;
+import android.view.*;
 import android.view.animation.AccelerateInterpolator;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Toast;
-
+import android.widget.*;
+import app.bookshare.model.BookDetailModel;
+import app.bookshare.model.UserBookAndGenreModel;
+import app.bookshare.util.Common;
+import app.bookshare.util.MultiSelectSpinner;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -42,20 +43,14 @@ import com.google.firebase.storage.UploadTask;
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.engine.impl.GlideEngine;
+import es.dmoral.toasty.Toasty;
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import app.bookshare.model.BookDetailModel;
-import app.bookshare.model.UserBookAndGenreModel;
-import app.bookshare.util.MultiSelectSpinner;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import pub.devrel.easypermissions.AfterPermissionGranted;
-import pub.devrel.easypermissions.EasyPermissions;
 
 public class AddBookActivity extends BaseActivity {
 
@@ -84,6 +79,14 @@ public class AddBookActivity extends BaseActivity {
     LinearLayout llRoot;
     @BindView(R.id.etBookDescription)
     EditText etBookDescription;
+    @BindView(R.id.tlBookName)
+    TextInputLayout tlBookName;
+    @BindView(R.id.tlBookAuthor)
+    TextInputLayout tlBookAuthor;
+    @BindView(R.id.tlBookPublisher)
+    TextInputLayout tlBookPublisher;
+    @BindView(R.id.tlBookDescription)
+    TextInputLayout tlBookDescription;
 
     private int revealX;
     private int revealY;
@@ -244,11 +247,31 @@ public class AddBookActivity extends BaseActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         if (item.getItemId() == R.id.action_done) {
-            putBookIntoDatabase();
+            if (validate()) {
+                putBookIntoDatabase();
+                Toasty.success(this, getString(R.string.messge_thank_you), Toast.LENGTH_SHORT, true).show();
+                finish();
+            }
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private boolean validate() {
+        boolean isValidate;
+
+        isValidate = Common.checkEmpty(etBookAuthor, tlBookAuthor,
+                getString(R.string.error_author_name))
+                && Common.checkEmpty(etBoookName, tlBookName, getString(R.string.error_book_name))
+                && Common.checkEmpty(etBookPublisher, tlBookPublisher, getString(R.string.error_publisher_name))
+                && Common.checkEmpty(etBookDescription, tlBookDescription, "Please enter description");
+
+        if (TextUtils.isEmpty(downloadImageUrl)) {
+            isValidate = false;
+            Toast.makeText(this, "Please select image cover for book", Toast.LENGTH_SHORT).show();
+        }
+        return isValidate;
     }
 
     private void putBookIntoDatabase() {
@@ -292,9 +315,9 @@ public class AddBookActivity extends BaseActivity {
             String CHANNEL_ID = "my_channel_01";// The id of the channel.
             CharSequence name = "Upload Image";// The user-visible name of the channel.
             int importance = 0;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 importance = NotificationManager.IMPORTANCE_HIGH;
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
                     mNotifyManager.createNotificationChannel(mChannel);
                 }
@@ -388,6 +411,9 @@ public class AddBookActivity extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_CHOOSE && resultCode == RESULT_OK) {
             mSelected = Matisse.obtainResult(data);
+            if (!mSelected.isEmpty()) {
+                Glide.with(this).load(mSelected.get(0)).into(ivAddBookPhoto);
+            }
             Log.d("Matisse", "mSelected: " + mSelected);
         }
     }

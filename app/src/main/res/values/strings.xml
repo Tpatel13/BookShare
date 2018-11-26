@@ -57,5 +57,9 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="error_author_name">Please enter author name</string>
+    <string name="error_book_name">Please enter book name</string>
+    <string name="error_publisher_name">Please enter publisher name</string>
+    <string name="messge_thank_you">Thank you for your inputs!</string>
 
 </resources>
