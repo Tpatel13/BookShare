@@ -413,6 +413,7 @@ public class AddBookActivity extends BaseActivity {
             mSelected = Matisse.obtainResult(data);
             if (!mSelected.isEmpty()) {
                 Glide.with(this).load(mSelected.get(0)).into(ivAddBookPhoto);
+                ivAddBookPhoto.setVisibility(View.VISIBLE);
             }
             Log.d("Matisse", "mSelected: " + mSelected);
         }
