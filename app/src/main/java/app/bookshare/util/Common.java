@@ -16,4 +16,8 @@ public class Common {
             return false;
         }
     }
+
+    public static class KeyIntents {
+        public static String ARG_BOOK = "bookDetail";
+    }
 }

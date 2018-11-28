@@ -1,6 +1,7 @@
 package app.bookshare.util;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
+import app.bookshare.BookDetailActivity;
 import app.bookshare.R;
 import app.bookshare.model.BookDetailModel;
 import butterknife.BindView;
@@ -35,7 +37,7 @@ public class BookViewHolder extends RecyclerView.ViewHolder {
         ButterKnife.bind(this, itemView);
     }
 
-    public void bindToPost(BookDetailModel bookDetailModel, Context context) {
+    public void bindToPost(final BookDetailModel bookDetailModel, final Context context) {
         tvAuthorName.setText(bookDetailModel.author);
         tvBookName.setText(bookDetailModel.name);
         if (bookDetailModel.genre != null) {
@@ -49,5 +51,14 @@ public class BookViewHolder extends RecyclerView.ViewHolder {
         tvOwnerName.setText(bookDetailModel.ownerName);
 
         Glide.with(context).load(bookDetailModel.imageUrl).into(ivBookCover);
+
+        itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, BookDetailActivity.class);
+                intent.putExtra(Common.KeyIntents.ARG_BOOK, bookDetailModel);
+                context.startActivity(intent);
+            }
+        });
     }
 }

@@ -1,5 +1,8 @@
 package app.bookshare.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.ServerValue;
 
@@ -8,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class BookDetailModel {
+public class BookDetailModel implements Parcelable {
     public String uid;
     public String author;
     public List<String> genre;
@@ -47,6 +50,52 @@ public class BookDetailModel {
         timestamp.put("date", ServerValue.TIMESTAMP);
 
         this.timestamp = timestamp;
+    }
+
+    public static final Creator<BookDetailModel> CREATOR = new Creator<BookDetailModel>() {
+        @Override
+        public BookDetailModel createFromParcel(Parcel in) {
+            return new BookDetailModel(in);
+        }
+
+        @Override
+        public BookDetailModel[] newArray(int size) {
+            return new BookDetailModel[size];
+        }
+    };
+
+    protected BookDetailModel(Parcel in) {
+        uid = in.readString();
+        author = in.readString();
+        genre = in.createStringArrayList();
+        name = in.readString();
+        ownerName = in.readString();
+        body = in.readString();
+        imageUrl = in.readString();
+        publisher = in.readString();
+        ownerEmail = in.readString();
+        ownerPhone = in.readString();
+        ownerProfileImageUrl = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(uid);
+        dest.writeString(author);
+        dest.writeStringList(genre);
+        dest.writeString(name);
+        dest.writeString(ownerName);
+        dest.writeString(body);
+        dest.writeString(imageUrl);
+        dest.writeString(publisher);
+        dest.writeString(ownerEmail);
+        dest.writeString(ownerPhone);
+        dest.writeString(ownerProfileImageUrl);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public String getUid() {

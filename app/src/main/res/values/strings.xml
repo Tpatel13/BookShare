@@ -61,5 +61,7 @@
     <string name="error_book_name">Please enter book name</string>
     <string name="error_publisher_name">Please enter publisher name</string>
     <string name="messge_thank_you">Thank you for your inputs!</string>
+    <string name="title_activity_book_detail">BookDetailActivity</string>
+    <string name="label_contact_info">Contact info</string>
 
 </resources>
