@@ -17,6 +17,11 @@ public class BookDetailModel {
     public String body;
     public String imageUrl;
     public String publisher;
+    public String ownerEmail;
+    public String ownerPhone;
+
+
+    public String ownerProfileImageUrl;
     public Map<String, Object> timestamp;
 
     public BookDetailModel() {
@@ -25,7 +30,7 @@ public class BookDetailModel {
     public BookDetailModel(String uid, String author, String publisher,
                            List<String> genre,
                            String name, String ownerName, String body,
-                           String imageUrl) {
+                           String imageUrl, String ownerEmail, String ownerPhone, String ownerProfileImageUrl) {
         this.uid = uid;
         this.author = author;
         this.publisher = publisher;
@@ -34,6 +39,9 @@ public class BookDetailModel {
         this.body = body;
         this.imageUrl = imageUrl;
         this.ownerName = ownerName;
+        this.ownerEmail = ownerEmail;
+        this.ownerPhone = ownerPhone;
+        this.ownerProfileImageUrl = ownerProfileImageUrl;
         //Date last changed will always be set to ServerValue.TIMESTAMP
         HashMap<String, Object> timestamp = new HashMap<String, Object>();
         timestamp.put("date", ServerValue.TIMESTAMP);
@@ -117,6 +125,22 @@ public class BookDetailModel {
         this.imageUrl = imageUrl;
     }
 
+    public String getOwnerEmail() {
+        return ownerEmail;
+    }
+
+    public void setOwnerEmail(String ownerEmail) {
+        this.ownerEmail = ownerEmail;
+    }
+
+    public String getOwnerPhone() {
+        return ownerPhone;
+    }
+
+    public void setOwnerPhone(String ownerPhone) {
+        this.ownerPhone = ownerPhone;
+    }
+
     @Exclude
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
@@ -126,6 +150,9 @@ public class BookDetailModel {
         result.put("genre", genre);
         result.put("name", name);
         result.put("ownerName", ownerName);
+        result.put("ownerEmail", ownerEmail);
+        result.put("ownerPhone", ownerPhone);
+        result.put("ownerProfileImageUrl", ownerProfileImageUrl);
         result.put("body", body);
         result.put("imageUrl", imageUrl);
         result.put("timestamp", timestamp);
@@ -137,5 +164,13 @@ public class BookDetailModel {
         HashMap<String, Object> result = new HashMap<>();
         result.put("imageUrl", imageUrl);
         return result;
+    }
+
+    public String getOwnerProfileImageUrl() {
+        return ownerProfileImageUrl;
+    }
+
+    public void setOwnerProfileImageUrl(String ownerProfileImageUrl) {
+        this.ownerProfileImageUrl = ownerProfileImageUrl;
     }
 }

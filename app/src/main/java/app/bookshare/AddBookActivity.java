@@ -18,24 +18,29 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.*;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewAnimationUtils;
+import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
-import android.widget.*;
-import app.bookshare.model.BookDetailModel;
-import app.bookshare.model.UserBookAndGenreModel;
-import app.bookshare.util.Common;
-import app.bookshare.util.MultiSelectSpinner;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Toast;
+
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -43,14 +48,23 @@ import com.google.firebase.storage.UploadTask;
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.engine.impl.GlideEngine;
-import es.dmoral.toasty.Toasty;
-import pub.devrel.easypermissions.AfterPermissionGranted;
-import pub.devrel.easypermissions.EasyPermissions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import app.bookshare.model.BookDetailModel;
+import app.bookshare.model.UserBookAndGenreModel;
+import app.bookshare.model.UserModel;
+import app.bookshare.util.Common;
+import app.bookshare.util.MultiSelectSpinner;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import es.dmoral.toasty.Toasty;
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
 
 public class AddBookActivity extends BaseActivity {
 
@@ -248,7 +262,7 @@ public class AddBookActivity extends BaseActivity {
 
         if (item.getItemId() == R.id.action_done) {
             if (validate()) {
-                putBookIntoDatabase();
+                readUserFromDatabase();
                 Toasty.success(this, getString(R.string.messge_thank_you), Toast.LENGTH_SHORT, true).show();
                 finish();
             }
@@ -256,6 +270,23 @@ public class AddBookActivity extends BaseActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void readUserFromDatabase() {
+        if (getUid() != null) {
+            database.child("users").child(getUid()).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    UserModel userModel = dataSnapshot.getValue(UserModel.class);
+                    putBookIntoDatabase(userModel);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }
     }
 
     private boolean validate() {
@@ -274,18 +305,25 @@ public class AddBookActivity extends BaseActivity {
         return isValidate;
     }
 
-    private void putBookIntoDatabase() {
+    private void putBookIntoDatabase(UserModel userModel) {
+
+
         FirebaseAuth auth = FirebaseAuth.getInstance();
         if (auth.getCurrentUser() != null) {
+
             FirebaseUser user = auth.getCurrentUser();
             String bookAuthor = etBookAuthor.getText().toString().trim();
             String bookPublisher = etBookPublisher.getText().toString().trim();
             List<String> selectedGenre = spBookGenre.getSelectedStrings();
             String bookName = etBoookName.getText().toString().trim();
             String bookDescription = etBookDescription.getText().toString().trim();
+
+            String userName = userModel.getFirst_name() + " " + userModel.getLast_name();
+
             BookDetailModel bookDetailModel = new BookDetailModel(user.getUid(),
-                    bookAuthor, bookPublisher, selectedGenre, bookName, auth.getCurrentUser().getDisplayName()
-                    , bookDescription, "");
+                    bookAuthor, bookPublisher, selectedGenre, bookName, userName
+                    , bookDescription, "", userModel.getEmail(), userModel.getPhoneNo(),
+                    userModel.getProfileImage());
 
             String key = database.child("books").push().getKey();
             Map<String, Object> bookValues = bookDetailModel.toMap();
