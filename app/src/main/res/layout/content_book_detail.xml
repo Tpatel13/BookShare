@@ -45,6 +45,8 @@
                     android:layout_marginLeft="@dimen/activity_horizontal_margin"
                     android:textColor="@android:color/white"
                     android:textSize="20sp"
+                    android:ellipsize="end"
+                    android:maxLines="2"
                     tools:text="The sorceere[asfasfkl;kl" />
 
                 <TextView
