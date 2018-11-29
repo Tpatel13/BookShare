@@ -6,20 +6,57 @@ import android.animation.AnimatorListenerAdapter;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.*;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewAnimationUtils;
+import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.zhihu.matisse.Matisse;
+import com.zhihu.matisse.MimeType;
+import com.zhihu.matisse.engine.impl.GlideEngine;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import app.bookshare.model.BookDetailModel;
 import app.bookshare.model.UserBookAndGenreModel;
 import app.bookshare.model.UserModel;
@@ -28,37 +65,18 @@ import app.bookshare.util.MultiSelectSpinner;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import com.bumptech.glide.Glide;
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.*;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
-import com.zhihu.matisse.Matisse;
-import com.zhihu.matisse.MimeType;
-import com.zhihu.matisse.engine.impl.GlideEngine;
 import es.dmoral.toasty.Toasty;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class AddBookActivity extends BaseActivity {
 
     public static final String EXTRA_CIRCULAR_REVEAL_X = "EXTRA_CIRCULAR_REVEAL_X";
     public static final String EXTRA_CIRCULAR_REVEAL_Y = "EXTRA_CIRCULAR_REVEAL_Y";
 
-    private static final int RC_CAMERA_STORAGE = 101;
+    private static final int RC_CAMERA_STORAGE = 103;
     private static final int REQUEST_CODE_CHOOSE = 102;
-
+    private static final int REQUEST_CAMERA = 101;
     View rootLayout;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -414,19 +432,51 @@ public class AddBookActivity extends BaseActivity {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
 
         if (EasyPermissions.hasPermissions(this, permissions)) {
-            Matisse.from(this)
-                    .choose(MimeType.ofImage())
-                    .countable(true)
-                    .maxSelectable(1)
-                    .gridExpectedSize(getResources().getDimensionPixelSize(R.dimen.grid_expected_size))
-                    .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
-                    .thumbnailScale(0.85f)
-                    .imageEngine(new GlideEngine())
-                    .forResult(REQUEST_CODE_CHOOSE);
+            selectImage();
         } else {
             EasyPermissions.requestPermissions(this, getString(R.string.camera_and_storage_rationale),
                     RC_CAMERA_STORAGE, permissions);
         }
+    }
+
+    public void selectImage() {
+        final CharSequence[] items = {"Take Photo", "Choose from Library",
+                "Cancel"};
+        AlertDialog.Builder builder = new AlertDialog.Builder(AddBookActivity.this);
+        builder.setTitle("Add Photo!");
+        builder.setCancelable(true);
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int item) {
+                if (items[item].equals("Take Photo")) {
+                    cameraIntent();
+                } else if (items[item].equals("Choose from Library")) {
+                    openGallery();
+                } else if (items[item].equals("Cancel")) {
+                    dialog.dismiss();
+                }
+            }
+        });
+        builder.show();
+    }
+
+    private void cameraIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_CAMERA);
+        }
+    }
+
+    private void openGallery() {
+        Matisse.from(this)
+                .choose(MimeType.ofImage())
+                .countable(true)
+                .maxSelectable(1)
+                .gridExpectedSize(getResources().getDimensionPixelSize(R.dimen.grid_expected_size))
+                .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                .thumbnailScale(0.85f)
+                .imageEngine(new GlideEngine())
+                .forResult(REQUEST_CODE_CHOOSE);
     }
 
     @Override
@@ -439,6 +489,13 @@ public class AddBookActivity extends BaseActivity {
                 ivAddBookPhoto.setVisibility(View.VISIBLE);
             }
             Log.d("Matisse", "mSelected: " + mSelected);
+        } else if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            Bitmap imageBitmap = (Bitmap) extras.get("data");
+            ivAddBookPhoto.setImageBitmap(imageBitmap);
+            mSelected = new ArrayList<>();
+            ivAddBookPhoto.setVisibility(View.VISIBLE);
+            mSelected.add(data.getData());
         }
     }
 

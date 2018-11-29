@@ -1,17 +1,28 @@
 package app.bookshare;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.NestedScrollView;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -22,8 +33,13 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.zhihu.matisse.Matisse;
+import com.zhihu.matisse.MimeType;
+import com.zhihu.matisse.engine.impl.GlideEngine;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import app.bookshare.model.UserModel;
@@ -35,6 +51,8 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 public class RegisterActivity extends AppCompatActivity {
 
+    private static final int REQUEST_CAMERA = 101;
+    private static final int RC_CAMERA_STORAGE = 103;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.login_progress)
@@ -63,6 +81,10 @@ public class RegisterActivity extends AppCompatActivity {
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
     @BindView(R.id.etAddress)
     EditText etAddress;
+    private static final int REQUEST_CODE_CHOOSE = 102;
+    final CharSequence[] items = {"Take Photo", "Choose from Library",
+            "Cancel"};
+    List<Uri> mSelected = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +96,7 @@ public class RegisterActivity extends AppCompatActivity {
 
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
     }
 
@@ -140,4 +163,84 @@ public class RegisterActivity extends AppCompatActivity {
         });
 
     }
+
+    @OnClick(R.id.iv_camera)
+    public void selectImage() {
+
+        String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
+
+        if (EasyPermissions.hasPermissions(this, permissions)) {
+            showDialog();
+        } else {
+            EasyPermissions.requestPermissions(this, getString(R.string.camera_and_storage_rationale),
+                    RC_CAMERA_STORAGE, permissions);
+        }
+
+
+    }
+
+    private void showDialog() {
+        final CharSequence[] items = {"Take Photo", "Choose from Library",
+                "Cancel"};
+        AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
+        builder.setTitle("Add Photo!");
+        builder.setCancelable(true);
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int item) {
+                if (items[item].equals("Take Photo")) {
+                    cameraIntent();
+                } else if (items[item].equals("Choose from Library")) {
+                    openGallery();
+                } else if (items[item].equals("Cancel")) {
+                    dialog.dismiss();
+                }
+            }
+        });
+        builder.show();
+    }
+
+    private void cameraIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_CAMERA);
+        }
+    }
+
+    private void openGallery() {
+        Matisse.from(this)
+                .choose(MimeType.ofImage())
+                .countable(true)
+                .maxSelectable(1)
+                .gridExpectedSize(getResources().getDimensionPixelSize(R.dimen.grid_expected_size))
+                .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                .thumbnailScale(0.85f)
+                .imageEngine(new GlideEngine())
+                .forResult(REQUEST_CODE_CHOOSE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == REQUEST_CODE_CHOOSE) {
+                mSelected = Matisse.obtainResult(data);
+                if (!mSelected.isEmpty()) {
+                    Glide.with(this).load(mSelected.get(0)).into(profileImage);
+                    profileImage.setVisibility(View.VISIBLE);
+                }
+            } else if (requestCode == REQUEST_CAMERA) {
+                Bundle extras = data.getExtras();
+                Bitmap imageBitmap = (Bitmap) extras.get("data");
+                profileImage.setImageBitmap(imageBitmap);
+                mSelected = new ArrayList<>();
+                mSelected.add(data.getData());
+            }
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
 }
