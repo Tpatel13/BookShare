@@ -13,11 +13,13 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -52,7 +54,11 @@ import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.engine.impl.GlideEngine;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +83,10 @@ public class AddBookActivity extends BaseActivity {
     private static final int RC_CAMERA_STORAGE = 103;
     private static final int REQUEST_CODE_CHOOSE = 102;
     private static final int REQUEST_CAMERA = 101;
+
+    String mCurrentPhotoPath;
+    Uri mCurrentPhotoUri;
+
     View rootLayout;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -462,8 +472,23 @@ public class AddBookActivity extends BaseActivity {
 
     private void cameraIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_CAMERA);
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                mCurrentPhotoUri = FileProvider.getUriForFile(this,
+                        "app.bookshare.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentPhotoUri);
+                startActivityForResult(takePictureIntent, REQUEST_CAMERA);
+            }
         }
     }
 
@@ -495,8 +520,24 @@ public class AddBookActivity extends BaseActivity {
             ivAddBookPhoto.setImageBitmap(imageBitmap);
             mSelected = new ArrayList<>();
             ivAddBookPhoto.setVisibility(View.VISIBLE);
-            mSelected.add(data.getData());
+            mSelected.add(mCurrentPhotoUri);
         }
     }
 
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = image.getAbsolutePath();
+        return image;
+    }
 }
