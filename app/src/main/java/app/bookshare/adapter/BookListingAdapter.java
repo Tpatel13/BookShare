@@ -8,14 +8,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
-
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.firebase.database.DatabaseError;
-
 import app.bookshare.R;
 import app.bookshare.model.BookDetailModel;
 import app.bookshare.util.BookViewHolder;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 
 public class BookListingAdapter extends FirebaseRecyclerAdapter<BookDetailModel, BookViewHolder> {
     /**
@@ -43,6 +42,7 @@ public class BookListingAdapter extends FirebaseRecyclerAdapter<BookDetailModel,
 
     @Override
     protected void onBindViewHolder(@NonNull BookViewHolder holder, int position, @NonNull BookDetailModel model) {
+        DatabaseReference bookRef = getRef(position);
         holder.bindToPost(model, mContext);
     }
 
