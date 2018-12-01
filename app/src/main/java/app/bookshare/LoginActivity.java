@@ -18,11 +18,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 
 /**
@@ -30,6 +35,8 @@ import com.google.firebase.auth.FirebaseUser;
  */
 public class LoginActivity extends AppCompatActivity {
 
+    @BindView(R.id.tvForgetPassword)
+    TextView tvForgetPassword;
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -47,6 +54,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        ButterKnife.bind(this);
 
         if (mAuth.getCurrentUser() != null) {
             startActivity(new Intent(this, MainActivity.class));
@@ -54,7 +62,7 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         // Set up the login form
-        mEmailView = findViewById(R.id.email);
+        mEmailView = findViewById(R.id.etEmail);
 
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -204,5 +212,9 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    @OnClick(R.id.tvForgetPassword)
+    public void forgotPassword() {
+        startActivity(new Intent(this, ForgotPasswordActivity.class));
+    }
 }
 

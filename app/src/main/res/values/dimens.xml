@@ -10,4 +10,5 @@
 
     <dimen name="grid_expected_size">120dp</dimen>
     <dimen name="empty_text_size_24">24sp</dimen>
+    <dimen name="margin_10">10dp</dimen>
 </resources>
