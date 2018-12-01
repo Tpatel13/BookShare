@@ -64,5 +64,11 @@
     <string name="title_activity_book_detail">BookDetailActivity</string>
     <string name="label_contact_info">Contact info</string>
     <string name="title_activity_my_books">My Books</string>
+    <string name="main_notification_channel_name">Image Uploading</string>
+    <string name="error_first_name">Please enter first name</string>
+    <string name="error_last_name">Please enter last name</string>
+    <string name="error_email">Please enter email address</string>
+    <string name="error_phone_number">Please enter phone number</string>
+    <string name="error_phone">Please enter valid phone number</string>
 
 </resources>

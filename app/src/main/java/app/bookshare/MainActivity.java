@@ -12,22 +12,37 @@ import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-public class MainActivity extends AppCompatActivity
+import app.bookshare.model.UserModel;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     @BindView(R.id.appbar)
     AppBarLayout appbar;
+
+    DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+    private ImageView headerImage;
+    private TextView navName;
+    private TextView navEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +69,40 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        View headerView = navigationView.getHeaderView(0);
+        headerImage = headerView.findViewById(R.id.imageView);
+        navEmail = headerView.findViewById(R.id.navEmail);
+        navName = headerView.findViewById(R.id.navName);
+
         setNonScrollBehaviour();
+        readUserFromDatabase();
+    }
+
+    private void readUserFromDatabase() {
+        if (getUid() != null) {
+            database.child("users").child(getUid()).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    UserModel userModel = dataSnapshot.getValue(UserModel.class);
+                    setUserInfo(userModel);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }
+    }
+
+    private void setUserInfo(UserModel userModel) {
+        if (userModel != null) {
+            if (!TextUtils.isEmpty(userModel.getProfileImage())) {
+                Glide.with(this).load(userModel.getProfileImage()).into(headerImage);
+            }
+            navName.setText(userModel.getFirst_name() + " " + userModel.getLast_name());
+            navEmail.setText(userModel.getEmail());
+        }
     }
 
     private void setNonScrollBehaviour() {
@@ -79,28 +127,6 @@ public class MainActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")

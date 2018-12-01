@@ -41,7 +41,7 @@
                     android:layout_width="96dp"
                     android:layout_height="96dp"
                     android:layout_gravity="bottom|center_horizontal"
-                    android:src="@drawable/sample_person"
+                    android:src="@drawable/person_placeholder_2"
                     app:civ_border_color="@android:color/white"
                     app:civ_border_width="1dp" />
 
@@ -58,6 +58,7 @@
 
 
             <android.support.design.widget.TextInputLayout
+                android:id="@+id/tlFirstName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -74,6 +75,7 @@
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
+                android:id="@+id/tlLastName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -90,6 +92,7 @@
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
+                android:id="@+id/tlEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -106,6 +109,7 @@
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
+                android:id="@+id/tlPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -124,6 +128,7 @@
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
+                android:id="@+id/tlPhoneNo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -140,6 +145,7 @@
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
+                android:id="@+id/tlAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 

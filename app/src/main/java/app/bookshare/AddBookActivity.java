@@ -23,6 +23,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -129,6 +130,8 @@ public class AddBookActivity extends BaseActivity {
     private NotificationCompat.Builder notificationBuilder;
     private String downloadImageUrl;
 
+    String CHANNEL_ID = "my_channel_01";// The id of the channel.
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -179,7 +182,7 @@ public class AddBookActivity extends BaseActivity {
         mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         notificationBuilder = new NotificationCompat.Builder(this,
-                "Upload Progress");
+                CHANNEL_ID);
     }
 
     private void setSpinner() {
@@ -362,16 +365,14 @@ public class AddBookActivity extends BaseActivity {
             imageUploadRef = storageRef.child(getUid()).child("images")
                     .child(time.toString()).child(mSelected.get(0).getLastPathSegment());
 
-            int notifyID = 1;
             String CHANNEL_ID = "my_channel_01";// The id of the channel.
-            CharSequence name = "Upload Image";// The user-visible name of the channel.
-            int importance = 0;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                importance = NotificationManager.IMPORTANCE_HIGH;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
-                    mNotifyManager.createNotificationChannel(mChannel);
-                }
+            CharSequence name = getString(R.string.main_notification_channel_name);// The user-visible name of the channel.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel mChannel = new NotificationChannel(
+                        CHANNEL_ID,
+                        name,
+                        NotificationManager.IMPORTANCE_HIGH);
+                mNotifyManager.createNotificationChannel(mChannel);
             }
 
             notificationBuilder.setContentTitle(getString(R.string.upload_video))
@@ -380,9 +381,15 @@ public class AddBookActivity extends BaseActivity {
                     .setAutoCancel(false)
                     .setSmallIcon(android.R.drawable.stat_sys_upload);
 
-            mNotifyManager.notify(notificationId, notificationBuilder.build());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN
+                    && Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                notificationBuilder.setPriority(NotificationCompat.PRIORITY_HIGH);
+            }
 
-            Toast.makeText(this, R.string.upload_in_progress, Toast.LENGTH_LONG).show();
+            mNotifyManager.notify(notificationId, notificationBuilder.build());
+            Toast loToast = Toast.makeText(this, R.string.upload_in_progress, Toast.LENGTH_LONG);
+            loToast.setGravity(Gravity.CENTER, 0, 0);
+            loToast.show();
 
             final UploadTask uploadTaskImage = imageUploadRef.putFile(mSelected.get(0));
             Task<Uri> urlTask = uploadTaskImage.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
@@ -421,6 +428,7 @@ public class AddBookActivity extends BaseActivity {
                 public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                     double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
                     notificationBuilder.setProgress(100, (int) progress, false);
+                    notificationBuilder.setContentText((int) progress + "% ");
                     mNotifyManager.notify(notificationId, notificationBuilder.build());
                 }
             });
@@ -516,10 +524,12 @@ public class AddBookActivity extends BaseActivity {
             Log.d("Matisse", "mSelected: " + mSelected);
         } else if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
-            ivAddBookPhoto.setImageBitmap(imageBitmap);
-            mSelected = new ArrayList<>();
-            ivAddBookPhoto.setVisibility(View.VISIBLE);
+            if (extras != null) {
+                Bitmap imageBitmap = (Bitmap) extras.get("data");
+                ivAddBookPhoto.setImageBitmap(imageBitmap);
+                mSelected = new ArrayList<>();
+                ivAddBookPhoto.setVisibility(View.VISIBLE);
+            }
             mSelected.add(mCurrentPhotoUri);
         }
     }
