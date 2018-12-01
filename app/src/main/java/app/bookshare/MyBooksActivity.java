@@ -6,6 +6,7 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -27,6 +28,7 @@ public class MyBooksActivity extends AppCompatActivity {
 
         setNonScrollBehaviour();
     }
+
 
     private void setNonScrollBehaviour() {
         CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) appbar.getLayoutParams();

@@ -70,5 +70,10 @@
     <string name="error_email">Please enter email address</string>
     <string name="error_phone_number">Please enter phone number</string>
     <string name="error_phone">Please enter valid phone number</string>
+    <string name="empty_view">No books here</string>
+    <string name="alert_delete_book">Are you sure want to delete this book?</string>
+
+    <string name="alert_dialog_ok">yes</string>
+    <string name="alert_dialog_cancel">No</string>
 
 </resources>

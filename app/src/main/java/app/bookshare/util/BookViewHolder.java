@@ -10,8 +10,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.database.DatabaseReference;
 
 import app.bookshare.BookDetailActivity;
+import app.bookshare.MyBooksActivity;
 import app.bookshare.R;
 import app.bookshare.model.BookDetailModel;
 import butterknife.BindView;
@@ -37,7 +39,7 @@ public class BookViewHolder extends RecyclerView.ViewHolder {
         ButterKnife.bind(this, itemView);
     }
 
-    public void bindToPost(final BookDetailModel bookDetailModel, final Context context) {
+    public void bindToPost(final BookDetailModel bookDetailModel, final Context context, final DatabaseReference bookRef) {
         tvAuthorName.setText(bookDetailModel.author);
         tvBookName.setText(bookDetailModel.name);
         if (bookDetailModel.genre != null) {
@@ -57,6 +59,9 @@ public class BookViewHolder extends RecyclerView.ViewHolder {
             public void onClick(View view) {
                 Intent intent = new Intent(context, BookDetailActivity.class);
                 intent.putExtra(Common.KeyIntents.ARG_BOOK, bookDetailModel);
+                if (context instanceof MyBooksActivity) {
+                    intent.putExtra(Common.KeyIntents.ARG_BOOK_KEY, bookRef.getKey());
+                }
                 context.startActivity(intent);
             }
         });

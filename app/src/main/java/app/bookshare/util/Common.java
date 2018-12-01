@@ -18,6 +18,7 @@ public class Common {
     }
 
     public static class KeyIntents {
+        public static final String ARG_BOOK_KEY = "arg_book_key";
         public static String ARG_BOOK = "bookDetail";
     }
 }

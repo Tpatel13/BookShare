@@ -1,18 +1,23 @@
 package app.bookshare;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.widget.NestedScrollView;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import app.bookshare.model.BookDetailModel;
 import app.bookshare.util.Common;
@@ -20,7 +25,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class BookDetailActivity extends AppCompatActivity {
+public class BookDetailActivity extends BaseActivity {
 
     @BindView(R.id.ivBookCover)
     ImageView ivBookCover;
@@ -151,4 +156,61 @@ public class BookDetailActivity extends AppCompatActivity {
     private void setBookDescription() {
         tvBookDescription.setText(mBookDetailModel.body);
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (getIntent().hasExtra(Common.KeyIntents.ARG_BOOK_KEY)) {
+            getMenuInflater().inflate(R.menu.activity_book_detail, menu);
+        }
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_delete) {
+            openDeleteAlertDialog();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void openDeleteAlertDialog() {
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle(R.string.alert_delete_book)
+                .setPositiveButton(R.string.alert_dialog_ok,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                dialog.dismiss();
+                                deleteBook();
+                                finish();
+                            }
+                        }
+                )
+                .setNegativeButton(R.string.alert_dialog_cancel,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                dialog.dismiss();
+                            }
+                        }
+                )
+                .create();
+        alertDialog.show();
+    }
+
+    private void deleteBook() {
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        if (getIntent().hasExtra(Common.KeyIntents.ARG_BOOK_KEY)) {
+            String key = getIntent().getStringExtra(Common.KeyIntents.ARG_BOOK_KEY);
+            databaseReference.child("books").child(key).removeValue();
+            if (getUid() != null) {
+                databaseReference.child("users-books").child(getUid()).child(key).removeValue();
+            }
+            for (String genre : mBookDetailModel.genre) {
+                databaseReference.child("genres").child(genre).child(key).removeValue();
+            }
+        }
+    }
+
+
 }

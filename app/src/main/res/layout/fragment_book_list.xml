@@ -5,6 +5,17 @@
     android:layout_height="match_parent"
     tools:context=".fragment.BookListFragment">
 
+    <TextView
+        android:id="@+id/tv_empty_recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:text="@string/empty_view"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/empty_text_size_24"
+        android:visibility="visible" />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rvBookList"
         android:layout_width="match_parent"

@@ -9,4 +9,5 @@
     <dimen name="text_size_18sp">18sp</dimen>
 
     <dimen name="grid_expected_size">120dp</dimen>
+    <dimen name="empty_text_size_24">24sp</dimen>
 </resources>

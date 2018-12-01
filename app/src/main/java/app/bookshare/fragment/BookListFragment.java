@@ -9,13 +9,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.TextView;
+
+import com.firebase.ui.database.FirebaseRecyclerOptions;
+
 import app.bookshare.R;
 import app.bookshare.adapter.BookListingAdapter;
 import app.bookshare.model.BookDetailModel;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import com.firebase.ui.database.FirebaseRecyclerOptions;
 
 
 /**
@@ -29,6 +32,8 @@ public abstract class BookListFragment extends Fragment {
     @BindView(R.id.pbBookList)
     ProgressBar pbBookList;
     Unbinder unbinder;
+    @BindView(R.id.tv_empty_recyclerView)
+    TextView tvEmptyRecyclerView;
 
 
     public BookListFragment() {
@@ -54,7 +59,8 @@ public abstract class BookListFragment extends Fragment {
 
     private void initAdapter() {
         rvBookList.setVisibility(View.VISIBLE);
-        BookListingAdapter bookListingAdapter = new BookListingAdapter(getOptions(), getActivity(), pbBookList);
+        BookListingAdapter bookListingAdapter = new BookListingAdapter(getOptions(),
+                getActivity(), pbBookList);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         linearLayoutManager.setStackFromEnd(true);
         linearLayoutManager.setReverseLayout(true);
@@ -62,7 +68,6 @@ public abstract class BookListFragment extends Fragment {
 
         bookListingAdapter.startListening();
         rvBookList.setAdapter(bookListingAdapter);
-
     }
 
     @Override
