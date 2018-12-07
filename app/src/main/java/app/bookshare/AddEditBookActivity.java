@@ -24,40 +24,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Toast;
-
-import com.bumptech.glide.Glide;
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
-import com.zhihu.matisse.Matisse;
-import com.zhihu.matisse.MimeType;
-import com.zhihu.matisse.engine.impl.GlideEngine;
-
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import android.widget.*;
 import app.bookshare.model.BookDetailModel;
 import app.bookshare.model.UserBookAndGenreModel;
 import app.bookshare.model.UserModel;
@@ -66,11 +33,30 @@ import app.bookshare.util.MultiSelectSpinner;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.*;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.zhihu.matisse.Matisse;
+import com.zhihu.matisse.MimeType;
+import com.zhihu.matisse.engine.impl.GlideEngine;
 import es.dmoral.toasty.Toasty;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class AddBookActivity extends BaseActivity {
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+public class AddEditBookActivity extends BaseActivity implements MultiSelectSpinner.OnMultipleItemsSelectedListener {
 
 
     private static final int RC_CAMERA_STORAGE = 103;
@@ -124,6 +110,8 @@ public class AddBookActivity extends BaseActivity {
 
     String CHANNEL_ID = "my_channel_01";// The id of the channel.
 
+    private BookDetailModel mBookDetailModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -143,8 +131,22 @@ public class AddBookActivity extends BaseActivity {
                 "gs://" + getResources().getString(R.string.google_storage_bucket));
 
         rootLayout = findViewById(R.id.root_layout);
+        final String[] stringsGameCat = getResources().getStringArray(R.array.genre_array);
+        spBookGenre.setItems(stringsGameCat);
+        spBookGenre.setListener(this);
+        if (intent.hasExtra(Common.KeyIntents.ARG_BOOK)) {
+            mBookDetailModel = intent.getParcelableExtra(Common.KeyIntents.ARG_BOOK);
+            etBoookName.setText(mBookDetailModel.name);
+            etBookAuthor.setText(mBookDetailModel.author);
+            etBookDescription.setText(mBookDetailModel.body);
+            etBookPublisher.setText(mBookDetailModel.publisher);
+            spBookGenre.setSelection(mBookDetailModel.genre);
+            ivAddBookPhoto.setVisibility(View.VISIBLE);
 
-        setSpinner();
+            Glide.with(this).load(mBookDetailModel.getImageUrl()).into(ivAddBookPhoto);
+
+        }
+
     }
 
     private void initNotification() {
@@ -154,10 +156,6 @@ public class AddBookActivity extends BaseActivity {
                 CHANNEL_ID);
     }
 
-    private void setSpinner() {
-        final String[] selected = {"Book Genre"};
-        spBookGenre.setItemsChecked(selected);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -206,9 +204,14 @@ public class AddBookActivity extends BaseActivity {
                 && Common.checkEmpty(etBookPublisher, tlBookPublisher, getString(R.string.error_publisher_name))
                 && Common.checkEmpty(etBookDescription, tlBookDescription, "Please enter description");
 
-        if (mSelected.isEmpty()) {
+        if (mSelected.isEmpty() && !getIntent().hasExtra(Common.KeyIntents.ARG_BOOK_KEY)) {
             isValidate = false;
             Toast.makeText(this, "Please select image cover for book", Toast.LENGTH_SHORT).show();
+        }
+
+        if (spBookGenre.getSelectedStrings().isEmpty()) {
+            isValidate = false;
+            Toast.makeText(this, "Please select genre", Toast.LENGTH_SHORT).show();
         }
         return isValidate;
     }
@@ -228,12 +231,21 @@ public class AddBookActivity extends BaseActivity {
 
             String userName = userModel.getFirst_name() + " " + userModel.getLast_name();
 
+            String imageUrl = "";
+
+            if (mBookDetailModel != null) {
+                imageUrl = mBookDetailModel.imageUrl;
+            }
+
             BookDetailModel bookDetailModel = new BookDetailModel(user.getUid(),
                     bookAuthor, bookPublisher, selectedGenre, bookName, userName
-                    , bookDescription, "", userModel.getEmail(), userModel.getPhoneNo(),
+                    , bookDescription, imageUrl, userModel.getEmail(), userModel.getPhoneNo(),
                     userModel.getProfileImage());
 
             String key = database.child("books").push().getKey();
+            if (getIntent().hasExtra(Common.KeyIntents.ARG_BOOK_KEY)) {
+                key = getIntent().getStringExtra(Common.KeyIntents.ARG_BOOK_KEY);
+            }
             Map<String, Object> bookValues = bookDetailModel.toMap();
 
             Map<String, Object> childUpdates = new HashMap<>();
@@ -352,7 +364,7 @@ public class AddBookActivity extends BaseActivity {
     public void selectImage() {
         final CharSequence[] items = {"Take Photo", "Choose from Library",
                 "Cancel"};
-        AlertDialog.Builder builder = new AlertDialog.Builder(AddBookActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(AddEditBookActivity.this);
         builder.setTitle("Add Photo!");
         builder.setCancelable(true);
         builder.setItems(items, new DialogInterface.OnClickListener() {
@@ -441,5 +453,15 @@ public class AddBookActivity extends BaseActivity {
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = image.getAbsolutePath();
         return image;
+    }
+
+    @Override
+    public void selectedIndices(List<Integer> indices) {
+
+    }
+
+    @Override
+    public void selectedStrings(List<String> strings) {
+
     }
 }

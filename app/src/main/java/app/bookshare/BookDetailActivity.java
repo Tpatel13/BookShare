@@ -1,6 +1,7 @@
 package app.bookshare;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
@@ -14,15 +15,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.bumptech.glide.Glide;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
 import app.bookshare.model.BookDetailModel;
 import app.bookshare.util.Common;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import com.bumptech.glide.Glide;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class BookDetailActivity extends BaseActivity {
@@ -170,6 +169,13 @@ public class BookDetailActivity extends BaseActivity {
         if (item.getItemId() == R.id.action_delete) {
             openDeleteAlertDialog();
             return true;
+        } else if (item.getItemId() == R.id.action_edit) {
+            Intent loIntent = new Intent(this, AddEditBookActivity.class);
+            loIntent.putExtra(Common.KeyIntents.ARG_BOOK_KEY,
+                    getIntent().getStringExtra(Common.KeyIntents.ARG_BOOK_KEY));
+            loIntent.putExtra(Common.KeyIntents.ARG_BOOK, mBookDetailModel);
+            startActivity(loIntent);
+            finish();
         }
         return super.onOptionsItemSelected(item);
     }

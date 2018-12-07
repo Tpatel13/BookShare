@@ -16,20 +16,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-
+import app.bookshare.model.UserModel;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import com.bumptech.glide.Glide;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
-import app.bookshare.model.UserModel;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.google.firebase.database.*;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -75,6 +69,7 @@ public class MainActivity extends BaseActivity
 
         setNonScrollBehaviour();
         readUserFromDatabase();
+
     }
 
     private void readUserFromDatabase() {
@@ -162,7 +157,7 @@ public class MainActivity extends BaseActivity
     public void presentActivity(View view) {
 
 
-        Intent intent = new Intent(this, AddBookActivity.class);
+        Intent intent = new Intent(this, AddEditBookActivity.class);
         startActivity(intent);
     }
 }

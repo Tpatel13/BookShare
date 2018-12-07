@@ -43,10 +43,10 @@
                 android:value="app.bookshare.LoginActivity" />
         </activity>
         <activity
-            android:name=".AddBookActivity"
-            android:label="@string/title_activity_add_book"
-            android:parentActivityName=".MainActivity"
-            android:theme="@style/AppTheme.Transparent">
+                android:name=".AddEditBookActivity"
+                android:label="@string/title_activity_add_book"
+                android:parentActivityName=".MainActivity"
+                android:theme="@style/AppTheme.Transparent">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="app.bookshare.MainActivity" />

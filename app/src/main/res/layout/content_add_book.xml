@@ -10,17 +10,17 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
     <LinearLayout
-        android:id="@+id/llRoot"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/background_light"
-        android:orientation="vertical"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
+            android:id="@+id/llRoot"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/background_light"
+            android:orientation="vertical"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
 
-        tools:context=".AddBookActivity"
-        tools:showIn="@layout/activity_add_book">
+            tools:context=".AddEditBookActivity"
+            tools:showIn="@layout/activity_add_book">
 
         <ImageView
             android:id="@+id/ivAddBookPhoto"
@@ -102,6 +102,7 @@
                 android:layout_height="wrap_content">
 
             </app.bookshare.util.MultiSelectSpinner>
+
 
         </FrameLayout>
 
