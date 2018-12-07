@@ -7,8 +7,6 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -162,16 +160,9 @@ public class MainActivity extends BaseActivity
     }
 
     public void presentActivity(View view) {
-        ActivityOptionsCompat options = ActivityOptionsCompat.
-                makeSceneTransitionAnimation(this, view, "transition");
-        int revealX = (int) (view.getX() + view.getWidth() / 2);
-        int revealY = (int) (view.getY() + view.getHeight() / 2);
+
 
         Intent intent = new Intent(this, AddBookActivity.class);
-        intent.putExtra(AddBookActivity.EXTRA_CIRCULAR_REVEAL_X, revealX);
-        intent.putExtra(AddBookActivity.EXTRA_CIRCULAR_REVEAL_Y, revealY);
-
-
-        ActivityCompat.startActivity(this, intent, options.toBundle());
+        startActivity(intent);
     }
 }

@@ -1,8 +1,6 @@
 package app.bookshare;
 
 import android.Manifest;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -18,7 +16,6 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
@@ -27,9 +24,6 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewAnimationUtils;
-import android.view.ViewTreeObserver;
-import android.view.animation.AccelerateInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -78,8 +72,6 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 public class AddBookActivity extends BaseActivity {
 
-    public static final String EXTRA_CIRCULAR_REVEAL_X = "EXTRA_CIRCULAR_REVEAL_X";
-    public static final String EXTRA_CIRCULAR_REVEAL_Y = "EXTRA_CIRCULAR_REVEAL_Y";
 
     private static final int RC_CAMERA_STORAGE = 103;
     private static final int REQUEST_CODE_CHOOSE = 102;
@@ -152,29 +144,6 @@ public class AddBookActivity extends BaseActivity {
 
         rootLayout = findViewById(R.id.root_layout);
 
-        if (savedInstanceState == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
-                intent.hasExtra(EXTRA_CIRCULAR_REVEAL_X) &&
-                intent.hasExtra(EXTRA_CIRCULAR_REVEAL_Y)) {
-            rootLayout.setVisibility(View.INVISIBLE);
-
-            revealX = intent.getIntExtra(EXTRA_CIRCULAR_REVEAL_X, 0);
-            revealY = intent.getIntExtra(EXTRA_CIRCULAR_REVEAL_Y, 0);
-
-
-            ViewTreeObserver viewTreeObserver = rootLayout.getViewTreeObserver();
-            if (viewTreeObserver.isAlive()) {
-                viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        revealActivity(revealX, revealY);
-                        rootLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                    }
-                });
-            }
-        } else {
-            rootLayout.setVisibility(View.VISIBLE);
-        }
-
         setSpinner();
     }
 
@@ -188,83 +157,6 @@ public class AddBookActivity extends BaseActivity {
     private void setSpinner() {
         final String[] selected = {"Book Genre"};
         spBookGenre.setItemsChecked(selected);
-    }
-
-    protected void revealActivity(int x, int y) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            float finalRadius = (float) (Math.max(rootLayout.getWidth(), rootLayout.getHeight()) * 1.1);
-
-            // create the animator for this view (the start radius is zero)
-            Animator circularReveal = ViewAnimationUtils.createCircularReveal(rootLayout, x, y, 0, finalRadius);
-            circularReveal.setDuration(400);
-            circularReveal.setInterpolator(new AccelerateInterpolator());
-            // make the view visible and start the animation
-            rootLayout.setVisibility(View.VISIBLE);
-            circularReveal.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationStart(Animator animator) {
-                    rootLayout.setBackgroundColor(ContextCompat.getColor(AddBookActivity.this,
-                            R.color.colorAccent));
-                    llRoot.setVisibility(View.GONE);
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animator) {
-                    rootLayout.setBackgroundColor(ContextCompat.getColor(AddBookActivity.this,
-                            android.R.color.background_light));
-                    llRoot.setVisibility(View.VISIBLE);
-                }
-
-                @Override
-                public void onAnimationCancel(Animator animator) {
-
-                }
-
-                @Override
-                public void onAnimationRepeat(Animator animator) {
-
-                }
-            });
-            circularReveal.start();
-
-        } else {
-            finish();
-        }
-    }
-
-    protected void unRevealActivity() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            finish();
-        } else {
-            float finalRadius = (float) (Math.max(rootLayout.getWidth(), rootLayout.getHeight()) * 1.1);
-            Animator circularReveal = ViewAnimationUtils.createCircularReveal(
-                    rootLayout, revealX, revealY, finalRadius, 0);
-
-            circularReveal.setDuration(400);
-            circularReveal.addListener(new AnimatorListenerAdapter() {
-
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    rootLayout.setBackgroundColor(ContextCompat.getColor(AddBookActivity.this,
-                            R.color.colorAccent));
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    rootLayout.setVisibility(View.INVISIBLE);
-                    finish();
-                }
-            });
-
-
-            circularReveal.start();
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        unRevealActivity();
-        super.onBackPressed();
     }
 
     @Override
