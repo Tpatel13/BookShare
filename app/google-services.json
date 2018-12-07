@@ -1,35 +1,27 @@
 {
   "project_info": {
-    "project_number": "936225223396",
-    "firebase_url": "https://sharethebook-16850.firebaseio.com",
-    "project_id": "sharethebook-16850",
-    "storage_bucket": "sharethebook-16850.appspot.com"
+    "project_number": "337795232532",
+    "firebase_url": "https://bookshare-4dec7.firebaseio.com",
+    "project_id": "bookshare-4dec7",
+    "storage_bucket": "bookshare-4dec7.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:936225223396:android:0ad9cfb447cd44b2",
+        "mobilesdk_app_id": "1:337795232532:android:0ad9cfb447cd44b2",
         "android_client_info": {
           "package_name": "app.bookshare"
         }
       },
       "oauth_client": [
         {
-          "client_id": "936225223396-uc99ao379luu22b7ids61nstukikd66k.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "app.bookshare",
-            "certificate_hash": "0a705d7d802e79966bfdbc7058e466f144c49db7"
-          }
-        },
-        {
-          "client_id": "936225223396-r1g2e5d1e6td8n654epfq7pf64ncth5k.apps.googleusercontent.com",
+          "client_id": "337795232532-08mvtpna4v4ttehbl4jhnmtbce8fm5vv.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCACuj8hC3HkYAPeW_EVJ_0tw46FysK6yQ"
+          "current_key": "AIzaSyBr1sF3Hn5aSBKdl6SOqx5kmSj1RR-Wl6M"
         }
       ],
       "services": {
@@ -37,13 +29,8 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "936225223396-r1g2e5d1e6td8n654epfq7pf64ncth5k.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "status": 1,
+          "other_platform_oauth_client": []
         },
         "ads_service": {
           "status": 2

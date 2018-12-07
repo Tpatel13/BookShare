@@ -23,7 +23,7 @@
             android:name=".MainActivity"
             android:configChanges="screenSize|orientation|smallestScreenSize"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".LoginActivity"
             android:theme="@style/AppTheme.NoActionBar">
@@ -77,7 +77,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths" />
         </provider>
 
         <activity
@@ -88,6 +88,15 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="app.bookshare.LoginActivity" />
+        </activity>
+        <activity
+            android:name=".CreditActivity"
+            android:label="@string/title_activity_credit"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="app.bookshare.MainActivity" />
         </activity>
     </application>
 

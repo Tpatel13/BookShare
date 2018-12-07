@@ -138,8 +138,8 @@ public class MainActivity extends BaseActivity
 
         if (id == R.id.nav_home) {
             // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
+        } else if (id == R.id.nav_credits) {
+            startActivity(new Intent(this, CreditActivity.class));
         } else if (id == R.id.nav_my_books) {
             startActivity(new Intent(MainActivity.this, MyBooksActivity.class));
         } else if (id == R.id.nav_logout) {

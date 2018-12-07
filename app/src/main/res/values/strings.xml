@@ -78,5 +78,12 @@
 
     <string name="link_forgot_password">Forgot password?</string>
     <string name="title_activity_forgot_password">Forgot password</string>
+    <string name="title_activity_credit">Credits</string>
+
+    <string name="hiral_email_id">hiral.hirani65@gmail.com</string>
+    <string name="tirth_email_id">tirthp1313@gmail.com</string>
+    <string name="rutvi_email_id">rutvieee0002@gmail.com</string>
+    <string name="umang_email_id">umangdobariya001@gmail.com</string>
+    <string name="raj_email_id">patelraj030@gmail.com</string>
 
 </resources>

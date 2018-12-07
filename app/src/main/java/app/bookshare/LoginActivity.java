@@ -35,6 +35,7 @@ import butterknife.OnClick;
  */
 public class LoginActivity extends AppCompatActivity {
 
+    //for eliminate findViewById and view binding
     @BindView(R.id.tvForgetPassword)
     TextView tvForgetPassword;
     /**
@@ -59,6 +60,7 @@ public class LoginActivity extends AppCompatActivity {
         if (mAuth.getCurrentUser() != null) {
             startActivity(new Intent(this, MainActivity.class));
             finish();
+            //if user already logged in we will skip this screen
         }
 
         // Set up the login form
